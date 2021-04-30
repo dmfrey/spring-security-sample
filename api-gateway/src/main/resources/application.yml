@@ -1,0 +1,87 @@
+server:
+  port: 8765
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: TRACE
+    org.springframework.security.oauth: TRACE
+    org.springframework.session: TRACE
+    org.springframework.web: INFO
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+
+      default-filters:
+        - TokenRelay=
+#        - RemoveResponseHeader=Set-Cookie
+#        - SaveSession
+
+      routes:
+        - id:  purchase-api
+          uri: lb://pivmart-purchase-api
+          predicates:
+            - Path=/api/purchases/**
+
+  security:
+    oauth2:
+
+      client:
+        registration:
+          api-gateway:
+            provider: spring-auth-server
+            client-id: api-gateway
+            client-secret: 572a20c6-be82-4264-94a9-c38532c410d5
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid, view, checkout
+            #,profile,email,view
+
+        provider:
+          spring-auth-server:
+            issuer-uri: http://auth-server:8080
+#            user-name-attribute: preferred_username
+#            user-info-authentication-method: header
+
+#      resourceserver:
+#        jwt:
+#          jwk-set-uri: http://localhost:8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+
+#cf bind-service pivmart-main pivmart-gateway -c '{ "routes": [{"uri": "lb://pivmart-main.apps.internal", "predicates": ["Path=/api/products/**,/api/catalogs/**"], "filters": ["StripPrefix=0"]}] }'
+#cf bind-service catalog-browser-pivmart pivmart-gateway -c '{ "routes": [{"uri": "lb://catalog-browser-pivmart.apps.internal", "order": 100, "predicates": ["Path=/**"], "filters": ["StripPrefix=0"]}] }'
+#cf bind-service cart-api pivmart-gateway -c '{ "routes": [{"uri": "lb://cart-api.apps.internal", "predicates": ["Path=/api/cart/**"], "filters": ["StripPrefix=0"]}] }'
+#cf bind-service purchase-api pivmart-gateway -c '{ "routes": [{"uri": "lb://purchase-api.apps.internal", "predicates": ["Path=/api/purchases/**"], "filters": ["StripPrefix=0"]}] }'
+
+#---
+#spring:
+#  profiles: cloud
+#  cloud:
+#    gateway:
+#      routes:
+#        - id: pivmart-api
+#          uri: lb://pivmart
+#          predicates:
+#            - Path=/api/products/**,/api/catalogs/**
+#        - id: cart-api
+#          uri: lb://cart-api
+#          predicates:
+#            - Path=/api/cart/**
+#        - id:  purchase-api
+#          uri: lb://purchase-api
+#          predicates:
+#            - Path=/api/purchases/**
+#        - id: pivmart-ui
+#          uri: http://pivmart-ui.apps.internal
+#          predicates:
+#            - Path=/**
+#

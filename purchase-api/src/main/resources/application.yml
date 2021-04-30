@@ -1,0 +1,26 @@
+server:
+  port: 8084
+
+logging.level:
+  org.springframework.security: DEBUG
+  org.springframework.security.oauth: TRACE
+  org.springframework.session: DEBUG
+  org.springframework.web: DEBUG
+  io.pivotal.purchaseapi: DEBUG
+
+spring:
+  application:
+    name: pivmart-purchase-api
+
+#  cloud:
+#    stream:
+#      bindings:
+#        checkoutListener-in-0:
+#          destination: cart-exchange
+#          group: purchase-api
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://auth-server:8080
